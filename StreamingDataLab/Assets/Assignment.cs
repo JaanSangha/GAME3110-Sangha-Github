@@ -99,8 +99,6 @@ static public class AssignmentPart1
             }
         }
 
-       // sw.WriteLine("SDGGRHRHGRD");
-
         sw.Close();
     }
 
@@ -130,7 +128,6 @@ static public class AssignmentPart1
                 GameContent.partyCharacters.Last.Value.equipment.AddLast(int.Parse(csv[1]));
             }
 
-            //Debug.Log(csv[0]);
         }
 
         GameContent.RefreshUI();
@@ -151,7 +148,7 @@ static public class AssignmentPart1
 //  This will enable the needed UI/function calls for your to proceed with your assignment.
 static public class AssignmentConfiguration
 {
-    public const int PartOfAssignmentThatIsInDevelopment = 1;
+    public const int PartOfAssignmentThatIsInDevelopment = 2;
 }
 
 /*
@@ -189,9 +186,49 @@ Good luck, journey well.
 
 static public class AssignmentPart2
 {
+    const int PartyCharacterSaveDataSignifier = 0;
+    const int PartyCharacterEquipmentSaveDataSignifier = 1;
+
+    static int lastIndexUsed;
+    static List<string> partyNames;
+    static LinkedList<NameAndIndex> nameAndIndices;
+
+    const string IndexFilePath = "indices.txt";
 
     static public void GameStart()
     {
+        nameAndIndices = new LinkedList<NameAndIndex>();
+
+        if (File.Exists(Application.dataPath + Path.DirectorySeparatorChar + IndexFilePath))
+        {
+            StreamReader sr = new StreamReader(Application.dataPath + Path.DirectorySeparatorChar + IndexFilePath);
+
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                Debug.Log(line);
+
+                string[] csv = line.Split(',');
+
+                int signifier = int.Parse(csv[0]);
+
+                if(signifier ==1)
+                {
+                    lastIndexUsed = int.Parse(csv[1]);
+                }
+                else if (signifier == 2)
+                {
+                    nameAndIndices.AddLast(new NameAndIndex(int.Parse(csv[1]), csv[2]));
+                }
+            }
+
+        }
+
+        partyNames = new List<string>();
+
+        partyNames.Add("Test1");
+        partyNames.Add("Test2");
+        partyNames.Add("Test3");
 
         GameContent.RefreshUI();
 
@@ -209,17 +246,65 @@ static public class AssignmentPart2
 
     static public void LoadPartyDropDownChanged(string selectedName)
     {
+
+        GameContent.partyCharacters.Clear();
+
+        StreamReader sr = new StreamReader(Application.dataPath + Path.DirectorySeparatorChar + "Party.txt");
+
+        string line;
+        while ((line = sr.ReadLine()) != null)
+        {
+            Debug.Log(line);
+
+            string[] csv = line.Split(',');
+
+            int signifier = int.Parse(csv[0]);
+
+            if (signifier == PartyCharacterSaveDataSignifier)
+            {
+                PartyCharacter pc = new PartyCharacter(int.Parse(csv[1]), int.Parse(csv[2]), int.Parse(csv[3]), int.Parse(csv[4]), int.Parse(csv[5]), int.Parse(csv[6]));
+                GameContent.partyCharacters.AddLast(pc);
+            }
+            else if (signifier == PartyCharacterEquipmentSaveDataSignifier)
+            {
+                GameContent.partyCharacters.Last.Value.equipment.AddLast(int.Parse(csv[1]));
+            }
+
+        }
         GameContent.RefreshUI();
     }
 
     static public void SavePartyButtonPressed()
     {
+        StreamWriter sw = new StreamWriter(Application.dataPath + Path.DirectorySeparatorChar + "Party.txt");
+
+        foreach (PartyCharacter pc in GameContent.partyCharacters)
+        {
+
+            sw.WriteLine(PartyCharacterSaveDataSignifier + ","
+                + pc.classID
+                + "," + pc.health
+                + "," + pc.mana
+                + "," + pc.strength
+                + "," + pc.agility
+                + "," + pc.wisdom);
+
+            foreach (int equip in pc.equipment)
+            {
+                sw.WriteLine(PartyCharacterEquipmentSaveDataSignifier + "," + equip);
+            }
+        }
+
+        sw.Close();
+
         GameContent.RefreshUI();
+
+        SaveIndexManagementFile();
     }
 
     static public void NewPartyButtonPressed()
     {
-
+        SaveIndexManagementFile();
     }
 
     static public void DeletePartyButtonPressed()
@@ -227,8 +312,36 @@ static public class AssignmentPart2
 
     }
 
+    static public void SaveIndexManagementFile()
+    {
+ 
+        StreamWriter sw = new StreamWriter(Application.dataPath + Path.DirectorySeparatorChar + IndexFilePath);
+
+
+        sw.WriteLine("1," + lastIndexUsed);
+
+        foreach(NameAndIndex nameAndIndex in nameAndIndices)
+        {
+            sw.WriteLine("2," + nameAndIndex + "," + nameAndIndex.name);
+        }   
+
+    }
+    
+
 }
 
+public class NameAndIndex
+
+{
+    public string name;
+    public int index;
+
+    public NameAndIndex(int Index, string Name)
+    {
+        name = Name;
+        index = Index;
+    }
+}
 #endregion
 
 

@@ -110,15 +110,6 @@ public class SystemManager : MonoBehaviour
             loadPartyDropDown.SetActive(true);
             rerollButton.SetActive(true);
 
-
-            //loadPartyDropDown.GetComponent<Dropdown>().setl
-
-            //             int menuIndex = loadPartyDropDown.GetComponent<Dropdown>().value;
-            // List<Dropdown.OptionData> menuOptions = loadPartyDropDown.GetComponent<Dropdown>().options;
-            // string value = menuOptions[menuIndex].text;
-            // AssignmentPart2.LoadPartyDropDownChanged(value);
-
-
             Dropdown dropdown = loadPartyDropDown.GetComponent<Dropdown>();
             dropdown.options.Clear();
             foreach (string option in AssignmentPart2.GetListOfPartyNames())
